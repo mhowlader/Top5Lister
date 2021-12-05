@@ -11,7 +11,8 @@ export const AuthActionType = {
     LOGIN_USER: "LOGIN_USER",
     LOGOUT_USER: "LOGOUT_USER",
     REGISTER_USER: "REGISTER_USER",
-    ERROR: "ERROR"
+    ERROR: "ERROR",
+    CLOSE_MODAL: "CLOSE_MODAL"
 }
 
 function AuthContextProvider(props) {
@@ -58,6 +59,13 @@ function AuthContextProvider(props) {
                 })
             }
             case AuthActionType.ERROR: {
+                return setAuth({
+                    user: auth.user,
+                    loggedIn: auth.loggedIn,
+                    errorMessage: payload
+                })
+            }
+            case AuthActionType.CLOSE_MODAL: {
                 return setAuth({
                     user: auth.user,
                     loggedIn: auth.loggedIn,
@@ -127,8 +135,14 @@ function AuthContextProvider(props) {
                 store.loadIdNamePairs();
             }
         }
-        catch {
-
+        catch (err) {
+            if (err.response.status == 400 || err.response.status ==401) {
+                console.log(err.response.data.errorMessage);
+                authReducer({
+                    type: AuthActionType.ERROR,
+                    payload: err.response.data.errorMessage
+                })
+            }
         }
 
     }
@@ -157,6 +171,13 @@ function AuthContextProvider(props) {
         }
         console.log("user initials: " + initials);
         return initials;
+    }
+
+    auth.closeModal = async function () {
+        authReducer({
+            type: AuthActionType.CLOSE_MODAL,
+            payload: ""
+        })
     }
 
     return (

@@ -3,7 +3,9 @@ import AuthContext from '../auth'
 import { GlobalStoreContext } from '../store'
 
 
-import Copyright from './Copyright'
+import Copyright from './Copyright';
+import ErrorModal from './ErrorModal'
+
 
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -99,6 +101,8 @@ export default function LoginScreen() {
                         >
                             Sign In
                         </Button>
+                        <ErrorModal></ErrorModal>
+
                         <Grid container>
                             <Grid item xs>
                                 <Link href="#" variant="body2">

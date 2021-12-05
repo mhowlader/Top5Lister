@@ -3,6 +3,8 @@ import AuthContext from '../auth'
 import { GlobalStoreContext } from '../store'
 
 import Copyright from './Copyright'
+import ErrorModal from './ErrorModal'
+
 
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -112,6 +114,7 @@ export default function RegisterScreen() {
                         >
                             Sign Up
                         </Button>
+                        <ErrorModal></ErrorModal>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
                                 <Link href="/login/" variant="body2">
