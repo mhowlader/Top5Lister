@@ -100,7 +100,7 @@ body {
   left: 0%;
   top: 10%;
   width: 100%;
-  height: 80%;
+  height: 95%;
   background-color: var(--swatch-primary);
 }
 
@@ -109,7 +109,7 @@ body {
   left: 0%;
   top: 10%;
   width: 100%;
-  height: 80%;
+  height: 100%;
   background-color: var(--swatch-accent);
 }
 
@@ -144,9 +144,9 @@ body {
 }
 
 #list-selector-list {
-  position: absolute;
+  position: relative;
   left: 0%;
-  top: 10%;
+  top: 5%;
   width: 100%;
   height: 90%;
   display: flex;
@@ -193,11 +193,11 @@ body {
 
 #workspace-home,
 #workspace-edit {
-  position: absolute;
+  position: relative;
   left: 0%;
   top: 0%;
   width: 100%;
-  height: 100%;
+  height: 80%;
 }
 
 #edit-numbering {
@@ -211,9 +211,9 @@ body {
 
 #edit-items {
   position: absolute;
-  left: 20%;
+  left: 0%;
   top: 0%;
-  width: 80%;
+  width: 100%;
   height: 100%;
   background-color: var(--swatch-primary);
 }

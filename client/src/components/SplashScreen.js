@@ -20,7 +20,8 @@ export default function SplashScreen() {
             <Typography variant="h1" m={2} align="center">
                 The Top 5 Lister
             </Typography>
-
+            
+            
 
             <Typography variant="h5">
                 Welcome to the Top 5 Lister!

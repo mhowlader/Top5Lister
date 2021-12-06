@@ -27,7 +27,8 @@ export const GlobalStoreActionType = {
     UNMARK_LIST_FOR_DELETION: "UNMARK_LIST_FOR_DELETION",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_ITEM_EDIT_ACTIVE: "SET_ITEM_EDIT_ACTIVE",
-    SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE"
+    SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
+    UPDATE_CURRENTLIST: "UPDATE_CURRENTLIST"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -157,6 +158,18 @@ function GlobalStoreContextProvider(props) {
                     listMarkedForDeletion: null
                 });
             }
+
+            case GlobalStoreActionType.UPDATE_CURRENTLIST: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    currentList: payload,
+                    newListCounter: store.newListCounter,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: null
+                });
+            }
+
             default:
                 return store;
         }
@@ -201,15 +214,18 @@ function GlobalStoreContextProvider(props) {
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
             payload: {}
         });
-        
-        tps.clearAllTransactions();
+
         history.push("/");
+        store.loadIdNamePairs();
+
+
     }
 
     // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
         let newListName = "Untitled" + store.newListCounter;
-        const response = await api.createTop5List(newListName, ["?", "?", "?", "?", "?"], auth.user.email);
+        console.log(auth.user);
+        const response = await api.createTop5List(newListName, ["?", "?", "?", "?", "?"], auth.user.username);
         console.log("createNewList response: " + response);
         if (response.status === 201) {
             tps.clearAllTransactions();
@@ -337,6 +353,57 @@ function GlobalStoreContextProvider(props) {
         store.updateCurrentList();
     }
 
+    store.saveList = async function (id,tlist) {
+        // let tlist = { ...store.currentList }
+        // tlist.items = top5List.listItems;
+        // tlist.name = top5List.listName;
+        // console.log(tlist.items);
+        // console.log()
+        // storeReducer({
+        //     type: GlobalStoreActionType.UPDATE_CURRENTLIST,
+        //     payload: tlist
+        // })
+        // store.updateCurrentList();
+
+        let response = await api.getTop5ListById(id);
+        if (response.status === 200) {
+            let top5List = response.data.top5List;
+            top5List.items = tlist.listItems;
+            top5List.name = tlist.listName
+            response = await api.updateTop5ListById(top5List._id, top5List);
+            
+        }
+
+        history.push("/");
+        store.loadIdNamePairs();
+        storeReducer({
+            type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
+            payload: {}
+        })
+    }
+
+    store.publishList = async function (id, tlist) {
+        console.log("publish");
+        let response = await api.getTop5ListById(id);
+        if (response.status === 200) {
+            let top5List = response.data.top5List;
+            top5List.items = tlist.listItems;
+            top5List.name = tlist.listName;
+            top5List.published = true;
+            top5List.date = new Date();
+            response = await api.updateTop5ListById(top5List._id, top5List);
+            
+        }
+        //const response = await api.updateTop5ListById(store.currentList._id, store.currentList);
+
+        history.push("/");
+        store.loadIdNamePairs();
+        storeReducer({
+            type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
+            payload: {}
+        })
+    }
+
     store.updateCurrentList = async function () {
         const response = await api.updateTop5ListById(store.currentList._id, store.currentList);
         if (response.status === 200) {
@@ -355,11 +422,11 @@ function GlobalStoreContextProvider(props) {
         tps.doTransaction();
     }
 
-    store.canUndo = function() {
+    store.canUndo = function () {
         return tps.hasTransactionToUndo();
     }
 
-    store.canRedo = function() {
+    store.canRedo = function () {
         return tps.hasTransactionToRedo();
     }
 

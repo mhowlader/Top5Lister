@@ -8,8 +8,18 @@ createTop5List = (req, res) => {
             errorMessage: 'Improperly formatted request',
         })
     }
+    console.log(body);
+    const finishedBody = {
+        ...body,
+        published: false,
+        likes: [],
+        dislikes: [],
+        views: 0,
+        comments: [],
+        date: "unpublished"
+    };
 
-    const top5List = new Top5List(body);
+    const top5List = new Top5List(finishedBody);
     console.log("creating top5List: " + JSON.stringify(top5List));
     if (!top5List) {
         return res.status(400).json({
@@ -33,6 +43,7 @@ createTop5List = (req, res) => {
                         })
                     })
                     .catch(error => {
+                        console.log(error)
                         return res.status(400).json({
                             errorMessage: 'Top 5 List Not Created!'
                         })
@@ -53,7 +64,7 @@ deleteTop5List = async (req, res) => {
 
         // DOES THIS LIST BELONG TO THIS USER?
         async function asyncFindUser(list) {
-            User.findOne({ email: list.ownerEmail }, (err, user) => {
+            User.findOne({ username: list.username }, (err, user) => {
                 console.log("user._id: " + user._id);
                 console.log("req.userId: " + req.userId);
                 if (user._id == req.userId) {
@@ -84,7 +95,7 @@ getTop5ListById = async (req, res) => {
 
         // DOES THIS LIST BELONG TO THIS USER?
         async function asyncFindUser(list) {
-            await User.findOne({ email: list.ownerEmail }, (err, user) => {
+            await User.findOne({ username: list.username }, (err, user) => {
                 console.log("user._id: " + user._id);
                 console.log("req.userId: " + req.userId);
                 if (user._id == req.userId) {
@@ -104,9 +115,9 @@ getTop5ListPairs = async (req, res) => {
     console.log("getTop5ListPairs");
     await User.findOne({ _id: req.userId }, (err, user) => {
         console.log("find user with id " + req.userId);
-        async function asyncFindList(email) {
-            console.log("find all Top5Lists owned by " + email);
-            await Top5List.find({ ownerEmail: email }, (err, top5Lists) => {
+        async function asyncFindList(username) {
+            console.log("find all Top5Lists owned by " + username);
+            await Top5List.find({ username: username }, (err, top5Lists) => {
                 console.log("found Top5Lists: " + JSON.stringify(top5Lists));
                 if (err) {
                     return res.status(400).json({ success: false, error: err })
@@ -125,7 +136,12 @@ getTop5ListPairs = async (req, res) => {
                         let list = top5Lists[key];
                         let pair = {
                             _id: list._id,
-                            name: list.name
+                            name: list.name,
+                            likes: list.likes,
+                            dislikes: list.dislikes,
+                            published: list.published,
+                            date: list.date,
+                            views: list.views
                         };
                         pairs.push(pair);
                     }
@@ -133,7 +149,7 @@ getTop5ListPairs = async (req, res) => {
                 }
             }).catch(err => console.log(err))
         }
-        asyncFindList(user.email);
+        asyncFindList(user.username);
     }).catch(err => console.log(err))
 }
 getTop5Lists = async (req, res) => {
@@ -164,6 +180,7 @@ updateTop5List = async (req, res) => {
     Top5List.findOne({ _id: req.params.id }, (err, top5List) => {
         console.log("top5List found: " + JSON.stringify(top5List));
         if (err) {
+            console.log(err);
             return res.status(404).json({
                 err,
                 message: 'Top 5 List not found!',
@@ -172,15 +189,19 @@ updateTop5List = async (req, res) => {
 
         // DOES THIS LIST BELONG TO THIS USER?
         async function asyncFindUser(list) {
-            await User.findOne({ email: list.ownerEmail }, (err, user) => {
+            await User.findOne({ username: list.username }, (err, user) => {
                 console.log("user._id: " + user._id);
                 console.log("req.userId: " + req.userId);
                 if (user._id == req.userId) {
                     console.log("correct user!");
                     console.log("req.body.name, req.body.items: " + req.body.name + ", " + req.body.items);
-
+                    
+                    console.log(body.top5List.name);
                     list.name = body.top5List.name;
                     list.items = body.top5List.items;
+                    list.published = body.top5List.published;
+                    list.date = body.top5List.date;
+                    
                     list
                         .save()
                         .then(() => {
@@ -208,6 +229,9 @@ updateTop5List = async (req, res) => {
         asyncFindUser(top5List);
     })
 }
+
+
+
 
 module.exports = {
     createTop5List,

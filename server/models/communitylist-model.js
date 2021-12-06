@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const Top5ListSchema = new Schema(
+const CommunityListSchema = new Schema(
     {
         name: { type: String, required: true },
         items: { type: [String], required: true },
