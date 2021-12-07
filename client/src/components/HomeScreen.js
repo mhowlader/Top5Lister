@@ -92,7 +92,7 @@ const HomeScreen = () => {
     };
 
     let listCard = "";
-    if (store) {
+    if (view=="0") {
         listCard =
             <List sx={{ width: '90%', left: '5%', bgcolor: 'background.paper' }}>
                 {
@@ -107,6 +107,27 @@ const HomeScreen = () => {
                 }
             </List>;
     }
+
+    if (view=="1") {
+        let pListPairs = [];
+        pListPairs = store.loadPublishedIdNamePairs();
+        console.log('p');
+        console.log(pListPairs);
+        listCard =
+            <List sx={{ width: '90%', left: '5%', bgcolor: 'background.paper' }}>
+                {
+                    store.idNamePairs.map((pair) => (
+                        <ListCard
+                            key={pair._id}
+                            idNamePair={pair}
+                            selected={false}
+                        />
+                    ))
+                }
+            </List>;
+    }
+
+
     return (
         <div id="top5-list-selector">
             <Box sx={{ borderBottom: 0.5, borderColor: 'divider', width: "100%", display: "inline-flex" }}>

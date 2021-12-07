@@ -260,6 +260,21 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
+
+    store.loadPublishedIdNamePairs = async function () {
+        const response = await api.getPublishedTop5ListPairs();
+        if (response.status === 200) {
+            let pairsArray = response.data.idNamePairs;
+            return pairsArray;
+        }
+        else {
+            console.log("API FAILED TO GET THE LIST PAIRS");
+            let emp = []
+            return emp;
+        }
+    }
+
+
     // THE FOLLOWING 5 FUNCTIONS ARE FOR COORDINATING THE DELETION
     // OF A LIST, WHICH INCLUDES USING A VERIFICATION MODAL. THE
     // FUNCTIONS ARE markListForDeletion, deleteList, deleteMarkedList,
@@ -294,6 +309,8 @@ function GlobalStoreContextProvider(props) {
             payload: null
         });
     }
+
+    
 
     // THE FOLLOWING 8 FUNCTIONS ARE FOR COORDINATING THE UPDATING
     // OF A LIST, WHICH INCLUDES DEALING WITH THE TRANSACTION STACK. THE
@@ -374,12 +391,23 @@ function GlobalStoreContextProvider(props) {
             
         }
 
-        history.push("/");
         store.loadIdNamePairs();
+        history.push("/");
         storeReducer({
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
             payload: {}
         })
+    }
+
+    store.incrementView = async function(id) {
+        let response = await api.getTop5ListById(id);
+        if (response.status === 200) {
+            let top5List = response.data.top5List;
+            top5List.views = top5List.views+1;
+            response = await api.updateTop5ListById(top5List._id, top5List);   
+        }
+
+        store.loadIdNamePairs();
     }
 
     store.publishList = async function (id, tlist) {
@@ -394,14 +422,27 @@ function GlobalStoreContextProvider(props) {
             response = await api.updateTop5ListById(top5List._id, top5List);
             
         }
-        //const response = await api.updateTop5ListById(store.currentList._id, store.currentList);
+        //const response = awausername:top5List.username,body:textit api.updateTop5ListById(store.currentList._id, store.currentList);
 
-        history.push("/");
         store.loadIdNamePairs();
+        history.push("/");
+        
         storeReducer({
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
             payload: {}
         })
+    }
+
+    store.addNewComment = async function(text,id) {
+        let response = await api.getTop5ListById(id);
+        if (response.status === 200) {
+            let top5List = response.data.top5List;
+            let comment = {username:top5List.username, body:text};
+            top5List.comments = [...top5List.comments,comment];
+            response = await api.updateTop5ListById(top5List._id, top5List);
+        }
+        store.loadIdNamePairs();
+
     }
 
     store.updateCurrentList = async function () {

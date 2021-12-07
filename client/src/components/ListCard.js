@@ -31,12 +31,10 @@ function ListCard(props) {
     const [editActive, setEditActive] = useState(false);
     const [text, setText] = useState("");
     const { idNamePair, selected } = props;
+    const [newComment, setNewComment] = useState("");
 
     const [expanded, setExpanded] = useState(false);
 
-    const handleChange = (panel) => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
-    };
 
     function handleLoadList(event, id) {
         console.log("handleLoadList for " + id);
@@ -65,6 +63,12 @@ function ListCard(props) {
         setEditActive(newActive);
     }
 
+    function like() {
+        store.like();
+    }
+
+    
+
     async function handleDeleteList(event, id) {
         event.stopPropagation();
         let _id = event.target.id;
@@ -83,6 +87,34 @@ function ListCard(props) {
         setText(event.target.value);
     }
 
+    function handleExpand(event) {
+        //event.stopPropagation();
+        if (!expanded) {
+            setExpanded(true);
+            if (idNamePair.published) {
+                store.incrementView(idNamePair._id);
+            }
+        } else {
+            setExpanded(false);
+        }
+
+
+    }
+
+    function handleComment(event) {
+        if (event.code === "Enter") {
+            //let index = event.target.id.substring("list-".length);
+            let text = event.target.value;
+            setNewComment(text);
+            store.addNewComment(text, idNamePair._id);
+        }
+    }
+
+
+
+    function doNothing(event) {
+        let hello = "hello";
+    }
     let selectClass = "unselected-list-card";
     if (selected) {
         selectClass = "selected-list-card";
@@ -91,6 +123,20 @@ function ListCard(props) {
     if (store.isListNameEditActive) {
         cardStatus = true;
     }
+
+    let editList = null;
+    let views = null;
+    let dates = null;
+    if (!idNamePair.published) {
+        editList =
+            <IconButton id={idNamePair._id} onClick={(event) => { handleLoadList(event, idNamePair._id) }} aria-label='edit'>
+                <EditIcon style={{ fontSize: '48pt' }} />
+            </IconButton>
+    } else {
+        views = <Typography sx={{m:1}}> {"Views: " + idNamePair.views} </Typography>
+        dates = <Typography sx={{m:1}}> {"Publish Date: " + idNamePair.date} </Typography>
+    }
+
     let cardElement =
         <ListItem
             id={idNamePair._id}
@@ -107,26 +153,31 @@ function ListCard(props) {
             }}
         >
 
-            <Accordion expanded={expanded} TransitionProps={{ unmountOnExit: true }} sx={{ width: 10 / 10 }}>
+            <Accordion onClick={doNothing} expanded={expanded} TransitionProps={{ unmountOnExit: true }} sx={{ width: 10 / 10 }}>
                 <AccordionSummary sx={{ display: "flex" }}>
-                    <Box sx={{ width: 7 / 10, p: 1 }}>{idNamePair.name}</Box>
-                    <Box sx={{ p: 1, width: 2 / 10, display: 'inline-flex' }}>
+                    <Box sx={{ width: 5 / 10, p: 1 }}>{idNamePair.name}</Box>
+                    {dates}
+                    <Box sx={{ p: 1, width: 2 / 10, display: 'flex' }}>
 
                         <IconButton onClick={handleToggleEdit} aria-label='edit'>
                             <ThumbUpIcon style={{ fontSize: '24pt' }} />
                         </IconButton>
                         <Typography> {idNamePair.likes.length} </Typography>
 
+                        
                         <IconButton onClick={handleToggleEdit} aria-label='edit'>
                             <ThumbDownIcon style={{ fontSize: '24pt' }} />
                         </IconButton>
+
                         <Typography> {idNamePair.dislikes.length} </Typography>
 
-                        <IconButton id={idNamePair._id} onClick={(event) => { handleLoadList(event, idNamePair._id) }} aria-label='edit'>
-                            <EditIcon style={{ fontSize: '48pt' }} />
-                        </IconButton>
+                        {views}
+
+                        
+
+                        {editList}
                     </Box>
-                    <Box sx={{ p: 1 }}>
+                    <Box sx={{ p: 1, width:3/10}}>
                         <IconButton onClick={(event) => {
                             handleDeleteList(event, idNamePair._id)
                         }} aria-label='delete'>
@@ -135,7 +186,7 @@ function ListCard(props) {
                     </Box>
                     <Box sx={{ p: 1 }}>
                         <IconButton onClick={(event) => {
-                            handleExpand(event, idNamePair._id)
+                            handleExpand(event)
                         }} aria-label='delete'>
                             <ExpandMoreIcon style={{ fontSize: '48pt' }} />
                         </IconButton>
@@ -144,14 +195,39 @@ function ListCard(props) {
 
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Grid container>
+                    <Grid container sx={{ height: 250 }}>
                         <Grid item xs={6}>
                             <List>
-                                <ListItem disablePadding>
-                                    <ListItemText primary="Inbox" />
-                                </ListItem>
+                                {
+                                    idNamePair.items.map((item, index) => (
+                                        <ListItem disablePadding>
+                                            <ListItemText primary={(index + 1) + ". " + item} />
+                                        </ListItem>
+                                    ))
+                                }
 
                             </List>
+                        </Grid>
+                        <Grid item xs={6} sx={{ maxHeight: "100%", overflow: "auto" }}>
+                            <List>
+                                {
+                                    idNamePair.comments.map((comment) => (
+                                        <ListItem disablePadding>
+                                            <ListItemText primary={comment.body} secondary={comment.username} />
+                                        </ListItem>
+                                    ))
+
+                                }
+
+                            </List>
+                            <TextField
+                                margin="normal"
+                                fullWidth
+                                onKeyPress={handleComment}
+                                label="Add Comment"
+                            >
+
+                            </TextField>
                         </Grid>
                     </Grid>
                 </AccordionDetails>

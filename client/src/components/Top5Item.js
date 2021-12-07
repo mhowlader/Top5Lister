@@ -36,7 +36,7 @@ function Top5Item(props) {
 
     function handleUpdateText(event) {
         setText(event.target.value);
-        updateItemName(index,text);
+        updateItemName(index,event.target.value);
     }
 
     let itemClass = "top5-item";

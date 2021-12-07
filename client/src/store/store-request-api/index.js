@@ -33,6 +33,7 @@ export const createTop5List = (newListName, newItems, username) => {
 export const deleteTop5ListById = (id) => api.delete(`/top5list/${id}`)
 export const getTop5ListById = (id) => api.get(`/top5list/${id}`)
 export const getTop5ListPairs = () => api.get(`/top5listpairs/`)
+export const getPublishedTop5ListPairs = () => api.get(`/alltop5publishedlistpairs/`)
 export const updateTop5ListById = (id, top5List) => {
     return api.put(`/top5list/${id}`, {
         // SPECIFY THE PAYLOAD
@@ -45,7 +46,8 @@ const apis = {
     deleteTop5ListById,
     getTop5ListById,
     getTop5ListPairs,
-    updateTop5ListById
+    updateTop5ListById,
+    getPublishedTop5ListPairs
 }
 
 export default apis
